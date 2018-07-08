@@ -1,0 +1,17 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+  <name> -- <role> -- <twitter>
+
+# THANKS
+
+  <name>
+  José Ramírez -- @1antares1
+  Bind ERP -- contacto@bind.com.mx
+
+# TECHNOLOGY COLOPHON
+
+  HTML5, CSS3
+  Angular, Firebase, TypeScript, Webpack

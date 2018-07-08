@@ -1,0 +1,26 @@
+.git
+.github
+.vscode
+coverage
+
+# OS generated files #
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# node Files #
+node_modules
+npm-debug.log
+npm-debug.log.*
+
+# dist #
+.awcache
+outputy
+dist
+compiled
+dll
+
+# IDE #
+.idea
+*.swp

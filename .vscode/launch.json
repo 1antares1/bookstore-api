@@ -1,0 +1,70 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Client Chrome against localhost",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:8080/*",
+            "runtimeArgs": [
+              "--user-data-dir",
+              "--disable-infobars",
+              "--disable-session-crashed-bubble",
+              "--remote-debugging-port=9222"
+            ],
+            "sourceMaps": true,
+            "webRoot": "${workspaceRoot}",
+            "sourceMapPathOverrides": {
+                 "webpack:///C:*":"C:/*"
+             },
+            "userDataDir": "C:\\temp\\chromeDummyDir"
+        },
+        {
+			"name": "Launch Node.JS Server",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}\\app.js",
+			"stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+                "NODE_ENV": "development"
+			},
+			"sourceMaps": true,
+            "console": "internalConsole"
+        },
+        {
+			"name": "Launch Production Server",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}\\app.js",
+			"stopOnEntry": false,
+            "args": [],
+            "cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+                "NODE_ENV": "production"
+			},
+			"sourceMaps": true,
+            "console": "internalConsole"
+		},
+		{
+			"name": "Attach Node.JS Server",
+			"type": "node",
+			"request": "attach",
+			"port": 5858,
+			"address": "localhost",
+			"restart": false,
+			"sourceMaps": false,
+			"localRoot": "${workspaceRoot}",
+			"remoteRoot": null
+		}
+    ]
+}

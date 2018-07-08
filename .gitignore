@@ -1,0 +1,79 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/client
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vs/
+
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# logs
+logs
+*.log
+/legacy-project/_SYNCAPP
+
+# runtime data
+pids
+*.pid
+*.seed
+
+# transpiled files (non-js)
+*.js
+*.js.map
+
+# compiled output
+/tmp
+/out-tsc
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+/typings
+npm-debug.log
+testem.log
+package-lock.json
+
+# dist
+/output
+/public/__build__/
+/src/*/__build__/
+/__build__/**
+/.awcache
+.webpack.json
+/compiled/
+dll/
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# doc #
+/doc/
+/documentation/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# compiled binary addons (http://nodejs.org/api/addons.html)
+build/Release
+
+# users environment variables
+.lock-wscript
