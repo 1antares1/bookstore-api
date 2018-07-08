@@ -7,9 +7,11 @@ import { info } from "console";
  */
 import Index from "./index";
 
+//#region constants
 const httpPort = normalizePort(process.env.PORT || 5000);
 const httpsPort = normalizePort(8443);
 const app = Index.bootstrap(null).httpService;
+//#endregion
 
 //#region certificates
 const certsPath = "certs";

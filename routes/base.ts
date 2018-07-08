@@ -148,8 +148,7 @@ export class BaseRoute {
         //
     }
 
-    // public setUpRoute(path: string, method: HttpMethod, application: Application, router: IRouter<any>, handler: RequestHandler, name?: string, parseXml?: boolean) {
-        public setUpRoute(path: string, method: HttpMethod, application: http.Server, router: httpRouter, handler: any, name?: string, parseXml?: boolean) {
+    public setUpRoute(path: string, method: HttpMethod, application: http.Server, router: httpRouter, handler: any, name?: string, parseXml?: boolean) {
         const target: string = (path === "/") ? " index " : " ";
         info(`[${name || "*Unknown-route"}::create] Creating${target}route: "${path}"`);
 
