@@ -4,7 +4,7 @@
 //#region models;
 import { IAppManagement, IAppConfig } from "../management/management.model";
 import { IConfigUrl } from "../url/url.model";
-import { IApi } from "../url/api.model";
+import { IApi } from "../api/api.model";
 //#endregion
 
 export interface IAppSettings {

@@ -1,7 +1,8 @@
-import { Observable } from "rxjs";
+import { Promise } from "bluebird";
+import { RequestPromise } from "request-promise";
 
 //#region models
-import { HttpMethod } from "../../shared/models/http-method.enum";
+import { HttpMethod } from "../../shared/enums/http-method.enum";
 //#endregion
 
-export type IHttpResource<T> = (method: HttpMethod, body?: any|object) => Observable<any>;
+export type IHttpResource<T> = (method: HttpMethod, body?: any|object) => RequestPromise;

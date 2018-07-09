@@ -1,4 +1,9 @@
+/**
+ * Own
+ */
+//#region models
 import { ConfigUrl } from "../url";
+//#endregion
 
 export class Api {
     public url: ConfigUrl;
