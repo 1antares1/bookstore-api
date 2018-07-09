@@ -16,17 +16,15 @@
     "**/client/dist/**",
     "**/node_modules/**",
     "**/legacy-project/**",
-    "**/output/**",
-
+    "**/output/**"
   ],
   "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/CVS": true,
-    "**/.DS_Store": true,
-    ".vs/": true,
-    "src/**/*.map": true,
-    "output/": true
-  }
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      ".vs/": true,
+      "**/*.js.map": true
+  },
 }

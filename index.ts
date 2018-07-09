@@ -5,19 +5,22 @@ import * as path from "path";
 import * as favicon from "serve-favicon";
 import * as bodyParser from "body-parser";
 import * as url from "url";
-import * as _ from "lodash";
 import { createReadStream } from "fs";
 import { NextHandleFunction, NextFunction, SimpleHandleFunction } from "./node_modules/@types/connect";
 
 /**
  * Own
  */
-//#region routes
-import { IRouteOptions, RenderType, BaseRoute } from "./routes";
-//#endregion
-
 //#region models
 import { ServerSettings } from "./config/settings/settings";
+//#endregion
+
+//#region routes
+import { IRouteOptions, RenderType, BaseRoute, BookRoutes } from "./routes";
+//#endregion
+
+//#region services
+import { BooksService } from "./repositories/books";
 //#endregion
 
 export const ROOT_PATH: string = path.join(__dirname, "./");
@@ -59,7 +62,7 @@ export default class Server {
     }
 
     public api(httpService: http.Server, router: httpRouter) {
-        // const bookRoutes = new BookRoutes(httpService, router);
+        const bookRoutes = new BookRoutes(httpService, router, new BooksService());
     }
 
     private config() {

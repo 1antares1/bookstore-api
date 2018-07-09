@@ -11,27 +11,27 @@ import { NextFunction } from "../node_modules/@types/connect";
  */
 //#region enums
 import { RenderType } from "./render-type.enum";
-import { HttpMethod } from "../shared/models/http-method.enum";
+import { HttpMethod } from "../shared/enums/http-method.enum";
 //#endregion
 
 //#region models
 import { IAppSettings } from "../config/settings/app-settings";
-import { FILE_EXTENSION_REGEX } from "../shared/regexps/file-extension.regex";
+import { FILE_EXTENSION_REGEX } from "../shared/helpers/regexps/file-extension.regex";
 import { IRouteOptions } from "./route-options";
+//#endregion
 
+//#region services
+import { IConfigService, ConfigService } from "../config";
 //#endregion
 
 export class BaseRoute {
-    private static _appSettings: IAppSettings;
+    private _configService: IConfigService;
     public static FILE_EXTENSION_REGEX: RegExp = FILE_EXTENSION_REGEX;
     public static CUSTOM_PATHS: string[] = ["/content/", "/js/"];
 
     //#region properties
-    public apiURL = "/api";
-    public apiVersion = "/v1";
-    public baseUrl = `${this.apiURL}${this.apiVersion}`;
-    public get appSettings(): IAppSettings {
-        return BaseRoute._appSettings || (BaseRoute._appSettings = BaseRoute.getDefaultAppSettings());
+    public get configService(): IConfigService {
+        return this._configService || (this._configService = new ConfigService());
     }
     //#endregion
 
@@ -78,70 +78,8 @@ export class BaseRoute {
         return new Error(`Not found: /${req.method.toString()} ${req.url}.`);
     }
 
-    public static getDefaultAppSettings(req?: http.IncomingMessage, res?: http.ServerResponse): IAppSettings {
-        const _env = "dev";
-        const _domains: string[] = [
-            "api.gbh.com.do"
-        ];
-        const _getProtocol = (full?: boolean, secure?: boolean): string => {
-            // get protocol using http.IncomingMessage - missing
-            let _protocol = ((secure) ? "https" : ((req && req.connection as any).encrypted) ? "https:" : ((req) ? req.headers["x-forwarded-proto"] as string || req.url : "http:"));
-            _protocol = _protocol.split(/\s*,\s*/)[0];
-            return (full) ? _protocol.concat("://") : _protocol;
-        };
-        const _fullUrl = (hostname: string): string => {
-            return url.format({
-                protocol: _getProtocol(),
-                host: hostname
-            });
-        };
-        const appSettings: IAppSettings = {
-            api: {
-                baseUrl: _domains[0],
-                key: process.env.apiKey ? process.env.apiKey : "cjA2aTJValJKVVpZdm1YU281QXkrcFhoVHNMUkF0Q3RMSzlHM0FDMEh5dzJHVnBsQzhKRXNSbFRsVCttWDJUSklXT2piQlRUbno3ditTSmhhL0w0NWIxNndJR1M3Um9aZVFBSkNMbXdHSFU9",
-                id: process.env.apiId ? process.env.apiId : "F139F723-1EA8-469D-B1C1-76EA62FEA599",
-                name: "api",
-                version: "v1"
-            },
-            appConfig: {
-                management: {
-                    maintenance: {
-                        scheduled: ((process.env.Maintenance_Scheduled && process.env.Maintenance_Scheduled !== "" && String(process.env.Maintenance_Scheduled) !== "false") || false),
-                        data: {
-                            title: process.env.Maintenance_Data_Title || "Date:",
-                            message: process.env.Maintenance_Data_Message || "We are working very hard on the new version of our site. It will bring a lot of new features.",
-                            datetime: new Date(process.env.Maintenance_Data_Datetime) || new Date()
-                        }
-                    }
-                },
-                supportEmail: process.env.supportEmail ? process.env.supportEmail : "info@gbh.com.do"
-            },
-            appId: "37FA1B99-6B14-4C52-823A-020C01FF2E53",
-            "Telemetry.AI.InstrumentationKey": process.env["Telemetry.AI.InstrumentationKey"] ? process.env["Telemetry.AI.InstrumentationKey"] : "4fc1db62-df05-49ce-864a-b62d1c377e04",
-            management: {
-                maintenance: null
-            },
-            urls: {
-                fragments: { },
-                identity: process.env.identity_Url
-                    ? _fullUrl(process.env.profile_Url)
-                    : _getProtocol(true, true).concat(_domains[0]),
-                externalIdentity: process.env.externalIdentity_Url
-                    ? _fullUrl(process.env.profile_Url)
-                    : _getProtocol(true, true).concat(_domains[0]),
-                profile: process.env.profile_Url
-                    ? _fullUrl(process.env.profile_Url)
-                    : _getProtocol(true, true).concat(_domains[0]),
-                translation: process.env.Translation_Url
-                    ? _fullUrl(process.env.profile_Url)
-                    : _getProtocol(true, true).concat(_domains[0])
-            }
-        };
-        return appSettings;
-    }
-
     private static initSettings(req: http.IncomingMessage, res: http.ServerResponse): IAppSettings {
-        return clone((this._appSettings = this.getDefaultAppSettings(req, res)));
+        return clone((ConfigService.getDefaultAppSettings(req, res)));
     }
 
     constructor() {
@@ -153,8 +91,7 @@ export class BaseRoute {
         info(`[${name || "*Unknown-route"}::create] Creating${target}route: "${path}"`);
 
         switch (method) {
-            case HttpMethod.GET: //
-                // (parseXml) ? router.get(path, xmlparser({ trim: false, explicitArray: false }), handler) : router.get(path, handler);
+            case HttpMethod.GET:
                 router.addRoute(path, handler);
                 break;
 
@@ -170,6 +107,7 @@ export class BaseRoute {
         }
         // application.use(router);
     }
+
     /**
      * Render a page.
      *
@@ -182,22 +120,18 @@ export class BaseRoute {
      * @return void
      */
     public render(req: http.IncomingMessage, res: http.ServerResponse, type: RenderType, routeOptions: IRouteOptions, data?: any) {
-        const sendHeaderResponse = (message: string, statusCode?: number, contentType?: string) => {
-            res.writeHead(statusCode || 500, message, { "Content-Type" : contentType || "text/plain" });
-        };
-
         try {
+            res.statusCode = 200;
+
             switch (type) {
                 case RenderType.data:
-                    res.statusCode = 200;
-                    res.setHeader("Content-Type", "application/json; charset=utf-8");
-                    res.write((typeof data !== "string") ? JSON.stringify(data) : data);
+                    this.endHandler(res, true, res.statusCode, null, { "Content-Type": "application/json; charset=utf-8" });
                     break;
 
                 case RenderType.file:
                     if ((req.url as string).match(BaseRoute.FILE_EXTENSION_REGEX) && !BaseRoute.CUSTOM_PATHS.some((val) => req.url.startsWith(val))) {
                         res.statusCode = 404;
-                        sendHeaderResponse(BaseRoute.getNotFoundErrorException(req).message, res.statusCode);
+                        this.writeHeadResponse(res, BaseRoute.getNotFoundErrorException(req).message, res.statusCode);
                     } else {
                         res.writeHead(302, {
                             "Location": url.resolve(routeOptions.host, req.url)
@@ -206,7 +140,7 @@ export class BaseRoute {
                     break;
             }
         } catch(ex) {
-            sendHeaderResponse((ex as string).toString());
+            this.writeHeadResponse(res, (ex as string).toString());
         } finally {
             res.end();
         }
@@ -224,5 +158,27 @@ export class BaseRoute {
      */
     public index(req: http.IncomingMessage, res: http.ServerResponse, type: RenderType, options: IRouteOptions, data?: any) {
         this.render(req, res, type, options, data);
+    }
+
+    public writeHeadResponse(res: http.ServerResponse, message: string, statusCode?: number, contentType?: string) {
+        res.writeHead(statusCode || 500, message, { "Content-Type" : contentType || "text/plain" });
+    }
+
+    public endHandler (res: http.ServerResponse, success: boolean, statusCode: number, data?: any, outHeaders?: http.OutgoingHttpHeaders): void {
+        res.statusCode = statusCode;
+        (outHeaders && Object.keys(outHeaders).length) ?
+            Object.keys(outHeaders).forEach((key: string) => {
+                res.setHeader(key, outHeaders[key]);
+            }) : res.setHeader("Content-Type", "application/json; charset=utf-8");
+
+        (success) ?
+            res.write((typeof data !== "string") ? JSON.stringify(data) : data) :
+            this.writeHeadResponse(res, data, statusCode);
+
+        res.end();
+    }
+
+    public getParsedUrl(urlString: string): url.UrlWithParsedQuery {
+        return (urlString && urlString !== "") ? url.parse(urlString, true) : null;
     }
 }
