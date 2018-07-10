@@ -122,7 +122,7 @@ export class BookRoutes extends BaseRoute {
             isbn: urlNodes[2],
             page: urlNodes[4],
             format: Format[Object.keys(Format).filter((key: string) => {
-                    return key.toLowerCase().indexOf(urlNodes[5].toLowerCase()) !== -1;
+                    return key.toLowerCase().indexOf((urlNodes[5] || Format.HTML).toLowerCase()) !== -1;
                 })[0]] || Format.HTML
         }
         const callbackError = (err: any, defaultHeaders: boolean = true) => {
