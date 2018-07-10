@@ -145,7 +145,7 @@
     <script type="text/javascript">
         var searchButtonId = "search-button";
         function searchBooks() {
-            location.replace(document.getElementById("bookForm").attributes.action.value.concat(document.getElementById("inputSearch").value));
+            window.location.href = document.getElementById("bookForm").attributes.action.value.concat(document.getElementById("inputSearch").value);
         }
         document.getElementById(searchButtonId).addEventListener("click", function(event) {
             (function(event) {
