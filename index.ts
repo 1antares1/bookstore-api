@@ -1,6 +1,7 @@
 import * as http from "http";
 import * as httpParse from "querystring";
 import * as httpRouter from "./node_modules/routes";
+import * as fs from "fs";
 import * as path from "path";
 import * as favicon from "serve-favicon";
 import * as bodyParser from "body-parser";
@@ -13,6 +14,7 @@ import { NextHandleFunction, NextFunction, SimpleHandleFunction } from "./node_m
  */
 //#region models
 import { ServerSettings } from "./config/settings/settings";
+import { FILE_EXTENSION_REGEX } from "./shared/helpers/regexps/file-extension.regex";
 //#endregion
 
 //#region routes
@@ -86,6 +88,21 @@ export default class Server {
             const pathname: string = url.parse(req.url).pathname;
             const verb: string = req.method;
             const match = this.router.match(req.url);
+            const callbackError = () => {
+                if (res.statusCode === 500) {
+                    dataResponse = {
+                        error: {
+                            status: req.statusCode,
+                            message: req.statusMessage,
+                            stack: (req as any).stack
+                        }
+                    };
+                } else {
+                    dataResponse = BaseRoute.getNotFoundErrorException(req);
+                }
+                res.writeHead(404, dataResponse)
+                res.end();
+            }
             let dataResponse: any;
 
             if (verb === "OPTIONS") {
@@ -97,9 +114,21 @@ export default class Server {
                 res.end();
                 return;
             }
+
             if (verb === "GET" && pathname === "/favicon.ico") {
                 res.setHeader("Content-Type", "image/x-icon");
                 createReadStream(path.join(ROOT_PATH, this.serverSettings.faviconPath)).pipe(res);
+                return;
+            }
+
+            if (verb === "GET" && pathname.match(FILE_EXTENSION_REGEX)) {
+                const fullPath: string = path.join(ROOT_PATH, ServerSettings.STATIC_ROOT_PATH, pathname);
+                if (!fs.existsSync(fullPath)) {
+                    dataResponse = "file doesn't exist in public directory";
+                    callbackError();
+                    return;
+                }
+                createReadStream(fullPath).pipe(res);
                 return;
             }
 
@@ -122,19 +151,7 @@ export default class Server {
                 }
             }
             else {
-                if (res.statusCode === 500) {
-                    dataResponse = {
-                        error: {
-                            status: req.statusCode,
-                            message: req.statusMessage,
-                            stack: (req as any).stack
-                        }
-                    };
-                } else {
-                    dataResponse = BaseRoute.getNotFoundErrorException(req);
-                }
-                res.writeHead(404, dataResponse)
-                res.end();
+                callbackError();
             }
         };
 
@@ -162,6 +179,7 @@ export default class Server {
             metaPath: path.join(ROOT_PATH, this.serverSettings.metaPath)
         };
 
+        BaseRoute.create("/", router, RenderType.file, routeSettings);
         BaseRoute.create("/robots.txt", router, RenderType.data, routeSettings);
         BaseRoute.create("/downrightnow", router, RenderType.file, routeSettings);
         BaseRoute.create("/api", router, RenderType.data);
