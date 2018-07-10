@@ -1,6 +1,6 @@
 import * as http from "http";
 import { Promise } from "bluebird";
-import { RequestPromise, Options, get, post, put, patch, del, head } from "request-promise";
+import { RequestPromise, Options, get, post, put, patch, del, head, OptionsWithUri } from "request-promise";
 import { clone } from "lodash/fp";
 
 /**
@@ -20,26 +20,27 @@ export function RequestMethod<T>(reqOptions: Options): IHttpResource<T> {
         rawRequest.method = HttpMethod[method].toString(),
         rawRequest.body = body;
 
-        const customRequest: Options = clone(reqOptions);
+        const customRequest: OptionsWithUri = clone(reqOptions as OptionsWithUri);
+        const url: string = customRequest.uri.toString();
         customRequest.method = HttpMethod[method].toString();
         customRequest.body = body;
         customRequest.json = true;
 
         switch (method) {
             case HttpMethod.POST:
-                return post(customRequest.baseUrl, customRequest);
+                return post(url, customRequest);
             case HttpMethod.PUT:
-                return put(customRequest.baseUrl, customRequest.body);
+                return put(url, customRequest.body);
             case HttpMethod.PATCH:
-                return patch(customRequest.baseUrl, customRequest.body);
+                return patch(url, customRequest.body);
             case HttpMethod.DELETE:
-                return del(customRequest.baseUrl, customRequest);
+                return del(url, customRequest);
             case HttpMethod.OPTIONS:
-                return head(customRequest.baseUrl, customRequest);
+                return head(url, customRequest);
             case HttpMethod.REQUEST:
             case HttpMethod.GET:
             default:
-                return get(customRequest.baseUrl, customRequest);
+                return get(url, customRequest);
         }
     };
 }

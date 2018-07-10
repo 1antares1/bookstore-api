@@ -10,7 +10,7 @@ import { IHttpResource } from "../../config/http/http-resource.model";
 //#endregion
 
 export interface IBooksService {
-    getBooks(): IHttpResource<Book[]>;
-    getBookDetails(): IHttpResource<Book[]>;
-    getBookFile(): IHttpResource<Book[]>;
+    getBooks(word?: string): IHttpResource<Book[]>;
+    getBookDetails(isbn: string): IHttpResource<BookDetails>;
+    getBookFile(isbn: string, urlFile: string): IHttpResource<BookFile>;
 }

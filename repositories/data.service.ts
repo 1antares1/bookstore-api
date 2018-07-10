@@ -1,4 +1,5 @@
 import { Options } from "request-promise";
+import * as url from "url";
 
 /**
  * Own
@@ -88,8 +89,8 @@ export class DataService implements IDataService {
         if (credentials) {
             let requestOptions: Options = {
                 method: HttpMethod[HttpMethod.OPTIONS],
-                baseUrl: this.getConfigService().appSettings.api.version,
-                uri: this.getConfigService().appSettings.api.version,
+                baseUrl: this.getConfigService().baseUrl,
+                uri: this.getConfigService().baseUrl,
                 headers:
                 {
                     [Object.keys(RequestHeader)[0]]: `${RequestHeader.Anonymous} ${credentials.token}`,
@@ -105,8 +106,8 @@ export class DataService implements IDataService {
         if (identity) {
             let requestOptions: Options = {
                 method: HttpMethod[HttpMethod.OPTIONS],
-                baseUrl: this.getConfigService().appSettings.api.version,
-                uri: this.getConfigService().appSettings.api.version,
+                baseUrl: this.getConfigService().baseUrl,
+                uri: this.getConfigService().baseUrl,
                 headers: {
                     [Object.keys(RequestHeader)[0]]: `${RequestHeader.Authorization} ${identity.authenticationToken}`
                 }
@@ -116,8 +117,8 @@ export class DataService implements IDataService {
         }
     }
 
-    public composeUrl(urlFragment: string, fullUrl?: boolean): string {
-        const composedUrl: string = this.getConfigService().appSettings.api.version + urlFragment;
+    public composeUrl(urlFragment: string, fromOrigin?: boolean, fullUrl?: boolean): string {
+        const composedUrl: string = (fromOrigin ? "" : this.getConfigService().baseUrl) + urlFragment;
         return (fullUrl) ? this.baseUrl().concat(composedUrl) : composedUrl;
     }
 
@@ -137,31 +138,30 @@ export class DataService implements IDataService {
         return currentRequestOptions;
     }
 
-    public prepareREST<T>(url: string, anotherDomain: boolean): Options {
-        const location: URL = new URL((anotherDomain) ? url : this.getConfigService().getRestConfig().baseUrl);
+    public prepareREST<T>(urlString: string, anotherDomain: boolean, queryString?: object): Options {
+        const location: URL = new url.URL((anotherDomain) ? urlString : this.getConfigService().getRestConfig().baseUrl);
         const config: Options = {
             method: HttpMethod[HttpMethod.OPTIONS],
-            baseUrl: location.href || location.pathname,
             uri: location.href || location.pathname,
-            headers: (this.getConfigService().getRestConfig() && this.getConfigService().getRestConfig().headers) ? this.getConfigService().getRestConfig().headers : { }
+            headers: (this.getConfigService().getRestConfig() && this.getConfigService().getRestConfig().headers) ? this.getConfigService().getRestConfig().headers : { },
         };
         this.getConfigService().setRestConfig(config);
         return {
             method: HttpMethod[HttpMethod.GET],
-            baseUrl: config.baseUrl,
-            uri: config.baseUrl,
-            headers: config.headers
+            uri: config.uri,
+            headers: config.headers,
+            qs: queryString
         } as Options;
     }
 
-    public signAnonymousRequest(url: string): ICredentials {
-        const credentials = this.createCredentials(url);
+    public signAnonymousRequest(urlString: string): ICredentials {
+        const credentials = this.createCredentials(urlString);
         this.applyCredentials(credentials);
         return credentials;
     }
 
 
-    public signAuthenticatedRequest(url: string): void {
+    public signAuthenticatedRequest(urlString: string): void {
         const identity: any = null;
         if (identity) {
             this.applyIdentity(identity);
@@ -177,17 +177,17 @@ export class DataService implements IDataService {
         return urlFragment;
     }
 
-    public getAuthenticatedResource<T>(route: string, anotherDomain: boolean = true, headers?: Array<ITuple<RequestHeader>>): Options {
+    public getAuthenticatedResource<T>(route: string, anotherDomain: boolean = true, fromOrigin?: boolean, headers?: Array<ITuple<RequestHeader>>, queryString?: object): Options {
         const url: string = this.getUrlFragment(route);
         this.optionalHeaders = headers;
         this.signAuthenticatedRequest(this.composeUrl(url));
-        return this.prepareREST<T>(this.composeUrl(url, true), anotherDomain);
+        return this.prepareREST<T>(this.composeUrl(url, fromOrigin, true), anotherDomain, queryString);
     }
 
-    public getAnonymousResource<T>(route: string, anotherDomain: boolean = true, headers?: Array<ITuple<RequestHeader>>): Options {
+    public getAnonymousResource<T>(route: string, anotherDomain: boolean = true, fromOrigin?: boolean, headers?: Array<ITuple<RequestHeader>>, queryString?: object): Options {
         const url: string = this.getUrlFragment(route);
         this.optionalHeaders = headers;
         this.signAnonymousRequest(this.composeUrl(url));
-        return this.prepareREST<T>(this.composeUrl(url, true), anotherDomain);
+        return this.prepareREST<T>(this.composeUrl(url, fromOrigin, true), anotherDomain, queryString);
     }
 }

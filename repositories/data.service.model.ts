@@ -16,13 +16,13 @@ export interface IDataService {
     createCredentials(absolutePath: string): ICredentials;
     applyIdentity(identity: any): void;
     applyCredentials(credentials: ICredentials): void;
-    composeUrl(urlfragment: string): string;
+    composeUrl(urlFragment: string, fromOrigin?: boolean, fullUrl?: boolean): string;
     prepareAuthenticatedOption<T>(currentRequestOptions: Options): Options;
     prepareAnonymousOptions(currentRequestOptions: Options): Options;
-    prepareREST<T>(url: string, anotherDomain: boolean): Options;
+    prepareREST<T>(url: string, anotherDomain: boolean, queryString?: object): Options;
     signAnonymousRequest(url: string): ICredentials;
     signAuthenticatedRequest(url: string): void;
     getUrlFragment(urlFragment: string): string;
-    getAuthenticatedResource<T>(route: string, anotherDomain: boolean, headers?: Array<ITuple<RequestHeader>>): Options;
-    getAnonymousResource<T>(route: string, anotherDomain: boolean, headers?: Array<ITuple<RequestHeader>>): Options;
+    getAuthenticatedResource<T>(route: string, anotherDomain: boolean, fromOrigin?: boolean, headers?: Array<ITuple<RequestHeader>>, queryString?: object): Options;
+    getAnonymousResource<T>(route: string, anotherDomain: boolean, fromOrigin?: boolean, headers?: Array<ITuple<RequestHeader>>, queryString?: object): Options;
 }
