@@ -164,18 +164,17 @@ export class BaseRoute {
         res.writeHead(statusCode || 500, message, { "Content-Type" : contentType || "text/plain" });
     }
 
-    public endHandler (res: http.ServerResponse, success: boolean, statusCode: number, data?: any, outHeaders?: http.OutgoingHttpHeaders): void {
+    public endHandler (res: http.ServerResponse, success: boolean, statusCode: number, response?: any, outHeaders?: http.OutgoingHttpHeaders): void {
         res.statusCode = statusCode;
         (outHeaders && Object.keys(outHeaders).length) ?
             Object.keys(outHeaders).forEach((key: string) => {
                 res.setHeader(key, outHeaders[key]);
             }) : res.setHeader("Content-Type", "application/json; charset=utf-8");
 
-        (success) ?
-            res.write((typeof data !== "string") ? JSON.stringify(data) : data) :
-            this.writeHeadResponse(res, data, statusCode);
-
-        res.end();
+        if (!success) {
+            (this && this.writeHeadResponse) ? this.writeHeadResponse(res, null, statusCode) : res.writeHead(statusCode, null, { "Content-Type" : "text/plain" })
+        }
+        res.end((typeof response !== "string") ? ((typeof response === "object") ? JSON.stringify(response) : response.toString()) : response);
     }
 
     public getParsedUrl(urlString: string): url.UrlWithParsedQuery {

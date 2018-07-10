@@ -1,2 +1,3 @@
-export * from "../regexps/email.regex";
-export * from "../regexps/file-extension.regex";
+export * from "./email.regex";
+export * from "./file-extension.regex";
+export * from "./url.regex";

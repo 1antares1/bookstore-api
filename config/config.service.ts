@@ -11,6 +11,10 @@ import { IAppSettings } from "./settings/app-settings";
 import { IConfigService } from "./config.service.model";
 //#endregion
 
+//#region services
+import { ConfigUrl } from "./url";
+//#endregion
+
 export class ConfigService implements IConfigService {
     private static _appSettings: IAppSettings;
     private static _restConfig: Options;
@@ -41,7 +45,8 @@ export class ConfigService implements IConfigService {
     }
 
     public init(): void {
-        this.baseUrl = `${this.appSettings.api.baseUrl}${this.appSettings.api.version}`;
+        this.baseUrl = `/${this.appSettings.api.name}/${this.appSettings.api.version}`;
+        this.isInitialized = true;
     }
 
     public setRestConfig(options: Options): void {
@@ -70,7 +75,7 @@ export class ConfigService implements IConfigService {
         ];
         const _getProtocol = (full?: boolean, secure?: boolean): string => {
             // get protocol using http.IncomingMessage - missing
-            let _protocol = ((secure) ? "https" : ((req && req.connection as any).encrypted) ? "https:" : ((req) ? req.headers["x-forwarded-proto"] as string || req.url : "http:"));
+            let _protocol = ((secure) ? "https" : (req && (req.connection as any).encrypted) ? "https" : ((req) ? req.headers["x-forwarded-proto"] as string || req.url : "http"));
             _protocol = _protocol.split(/\s*,\s*/)[0];
             return (full) ? _protocol.concat("://") : _protocol;
         };
@@ -82,7 +87,6 @@ export class ConfigService implements IConfigService {
         };
         const appSettings: IAppSettings = {
             api: {
-                baseUrl: _domains[0],
                 key: process.env.apiKey ? process.env.apiKey : "cjA2aTJValJKVVpZdm1YU281QXkrcFhoVHNMUkF0Q3RMSzlHM0FDMEh5dzJHVnBsQzhKRXNSbFRsVCttWDJUSklXT2piQlRUbno3ditTSmhhL0w0NWIxNndJR1M3Um9aZVFBSkNMbXdHSFU9",
                 id: process.env.apiId ? process.env.apiId : "F139F723-1EA8-469D-B1C1-76EA62FEA599",
                 name: "api",
@@ -107,7 +111,7 @@ export class ConfigService implements IConfigService {
                 maintenance: null
             },
             urls: {
-                fragments: { },
+                fragments: new ConfigUrl().fragments,
                 identity: process.env.identity_Url
                     ? _fullUrl(process.env.profile_Url)
                     : _getProtocol(true, true).concat(_domains[0]),
@@ -116,13 +120,13 @@ export class ConfigService implements IConfigService {
                     : _getProtocol(true, true).concat(_domains[0]),
                 categories: process.env.profile_Url
                     ? _fullUrl(process.env.profile_Url)
-                    : _getProtocol(true, true).concat(_domains[1]),
+                    : _getProtocol(true, false).concat(_domains[1]),
                 books: process.env.profile_Url
                     ? _fullUrl(process.env.profile_Url)
-                    : _getProtocol(true, true).concat(_domains[1]),
+                    : _getProtocol(true, false).concat(_domains[1]),
                 files: process.env.Translation_Url
                     ? _fullUrl(process.env.profile_Url)
-                    : _getProtocol(true, true).concat(_domains[1]),
+                    : _getProtocol(true, false).concat(_domains[1]),
                 translation: process.env.Translation_Url
                     ? _fullUrl(process.env.profile_Url)
                     : _getProtocol(true, true).concat(_domains[0])
