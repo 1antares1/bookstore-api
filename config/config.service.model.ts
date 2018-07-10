@@ -14,6 +14,7 @@ export interface IConfigService {
     rolesDataId: string;
     baseRoute: string;
     isInitialized: boolean;
+    baseUrl: string;
     setRestConfig(options: Options): void;
     getRestConfig(): Options;
     mergeHttpHeaders(source: OutgoingHttpHeaders, target: OutgoingHttpHeaders): OutgoingHttpHeaders;
