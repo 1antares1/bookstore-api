@@ -18,6 +18,7 @@ import { HttpMethod } from "../shared/enums/http-method.enum";
 import { IAppSettings } from "../config/settings/app-settings";
 import { FILE_EXTENSION_REGEX } from "../shared/helpers/regexps/file-extension.regex";
 import { IRouteOptions } from "./route-options";
+import { Format } from "../shared/enums/format.enum";
 //#endregion
 
 //#region services
@@ -49,6 +50,11 @@ export class BaseRoute {
 
         router.addRoute(path, (req: http.IncomingMessage, res: http.ServerResponse, next: NextFunction) => {
             switch (path) {
+                case "/":
+                    readFile(options.indexPath, (err: NodeJS.ErrnoException, data: Buffer) => {
+                        nextCallback(req, res, data.toString("utf8") || JSON.stringify(err));
+                    });
+                    break;
                 case "/robots.txt":
                      readFile(this.getFullUrl(req, `${options.metaPath}\\${req.url.split("/").reverse()[0]}`).href, (err: NodeJS.ErrnoException, data: Buffer) => {
                         nextCallback(req, res, data.toString("utf8") || JSON.stringify(err));
@@ -119,13 +125,15 @@ export class BaseRoute {
      * @param routeOptions {Object} Additional options to append to the view"s local scope.
      * @return void
      */
-    public render(req: http.IncomingMessage, res: http.ServerResponse, type: RenderType, routeOptions: IRouteOptions, data?: any) {
+    public render(req: http.IncomingMessage, res: http.ServerResponse, type: RenderType, routeOptions: IRouteOptions, data?: any, format?: Format) {
+        const outHeaders: http.OutgoingHttpHeaders = { "Content-Type": "application/json; charset=utf-8" };
+
         try {
             res.statusCode = 200;
-
             switch (type) {
                 case RenderType.data:
-                    this.endHandler(res, true, res.statusCode, null, { "Content-Type": "application/json; charset=utf-8" });
+                    outHeaders[Object.keys(outHeaders)[0]] = "application/json; charset=utf-8";
+                    this.endHandler(res, true, res.statusCode, null, outHeaders);
                     break;
 
                 case RenderType.file:
@@ -133,9 +141,9 @@ export class BaseRoute {
                         res.statusCode = 404;
                         this.writeHeadResponse(res, BaseRoute.getNotFoundErrorException(req).message, res.statusCode);
                     } else {
-                        res.writeHead(302, {
-                            "Location": url.resolve(routeOptions.host, req.url)
-                        });
+                        outHeaders[Object.keys(outHeaders)[0]] = format || "text/html";
+                        res.writeHead(res.statusCode, { "Content-Type": "text/html" });
+                        res.end(data);
                     }
                     break;
             }
@@ -174,7 +182,7 @@ export class BaseRoute {
         if (!success) {
             (this && this.writeHeadResponse) ? this.writeHeadResponse(res, null, statusCode) : res.writeHead(statusCode, null, { "Content-Type" : "text/plain" })
         }
-        res.end((typeof response !== "string") ? ((typeof response === "object") ? JSON.stringify(response) : response.toString()) : response);
+        res.end((typeof response !== "string") ? ((typeof response === "object" || response instanceof Array) ? JSON.stringify(response) : response.toString()) : response);
     }
 
     public getParsedUrl(urlString: string): url.UrlWithParsedQuery {

@@ -10,12 +10,11 @@ import { AccessInfo } from "./models/access-info.model";
 //#endregion
 
 export interface BookDetails extends Book {
-    kind: string;
-    id: string;
-    etag: string;
     selfLink: string;
     volumeInfo: VolumeInfo;
     userInfo: UserInfo;
     saleInfo: SaleInfo;
     accessInfo: AccessInfo;
+    kind?: string;
+    etag?: string;
 }

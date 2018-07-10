@@ -7,11 +7,11 @@ import { RetailPrice } from "./retail-price.model";
 //#endregion
 
 export interface SaleInfo {
-    country: string;
-    saleability: string;
-    onSaleDate: string;
-    isEbook: boolean;
-    listPrice: ListPrice;
+    country?: string;
+    saleability?: string;
+    onSaleDate?: string;
+    isEbook?: boolean;
+    listPrice?: ListPrice;
     retailPrice: RetailPrice;
-    buyLink: string;
+    buyLink?: string;
 }
