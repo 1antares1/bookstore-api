@@ -12,8 +12,8 @@
         "url": ""
     },
     "scripts": {
-        "start": "npm run server-start",
-        "start:prod": "npm run build:prod && npm run server:prod",
+        "start": "npm run build:prod && npm run server:prod",
+        "start:dev": "npm run server-start",
         "start:hmr:ssl": "ng serve --hmr -e=hmr --proxy-config proxy.conf.js --ssl 1 --ssl-key \"certs/gbh.com.do.key.pem\" --ssl-cert \"certs/gbh.com.do.key.pem/gbh.com.do.cert.pem\"",
         "build": "tsc --project tsconfig.json --sourceMap",
         "build:prod": "tsc --project tsconfig.json",
